@@ -3,6 +3,7 @@ module github.com/memnix/memnixlogs
 go 1.17
 
 require (
+	github.com/joho/godotenv v1.4.0
 	github.com/memnix/rabbitmq-tools v0.0.1
 	github.com/rabbitmq/amqp091-go v1.3.0
 	go.mongodb.org/mongo-driver v1.8.4

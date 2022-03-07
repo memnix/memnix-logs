@@ -1,11 +1,11 @@
 package main
 
 import (
-"context"
-"fmt"
-"go.mongodb.org/mongo-driver/mongo"
-"go.mongodb.org/mongo-driver/mongo/options"
-"time"
+	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 // MongoInstance contains the Mongo client and database objects
@@ -17,7 +17,7 @@ type MongoInstance struct {
 func Connect() error {
 
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(MongoURL)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	// Connect to MongoDB

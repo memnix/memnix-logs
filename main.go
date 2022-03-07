@@ -21,6 +21,10 @@ func failOnError(err error, msg string) {
 var mg MongoInstance
 
 func main() {
+
+	// Load var from .env file
+	LoadVar()
+
 	err := Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -36,7 +40,7 @@ func main() {
 
 	connection := new(rmq.RabbitMQConnection)
 
-	err = connection.InitConnection("amqp://guest:guest@localhost:5672/", "logs")
+	err = connection.InitConnection(RabbitMQURL, "logs")
 	if err != nil {
 		return
 	}
@@ -59,6 +63,7 @@ func main() {
 
 	queueMap := make(map[string]string)
 	queueMap["error"] = "error"
+	queueMap["warning"] = "warning"
 	queueMap["info"] = "info"
 
 	queues := []rmq.Queue{{
@@ -67,6 +72,9 @@ func main() {
 	}, {
 		Keys: []string{"info.#"},
 		Name: "info",
+	}, {
+		Keys: []string{"warning.#"},
+		Name: "warning",
 	}}
 
 	err = connection.AddQueues(queues)
@@ -84,7 +92,6 @@ func main() {
 	for q, d := range deliveries {
 		go func(q string, delivery <-chan amqp.Delivery) {
 			for d := range delivery {
-				log.Printf("Received a message: %s from %s", d.Body, q)
 				logObject := new(Log)
 				err := json.Unmarshal(d.Body, &logObject)
 				collection := mg.Db.Collection(queueMap[connection.GetQueue(q).Name])
