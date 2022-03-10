@@ -2,6 +2,7 @@ docker.rabbitmq:
 	docker run --restart=unless-stopped -d \
 		 --name dev-rabbitmq \
 		 --hostname dev-rabbitmq \
+		 --network=rabbitmq \
 		 -v ${HOME}/dev-rabbitmq:/var/lib/rabbitmq \
 		 -v ${PWD}/configs/definitions.json:/opt/definitions.json:ro \
 		 -v ${PWD}/configs/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro \
