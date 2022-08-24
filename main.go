@@ -97,7 +97,7 @@ func main() {
 				collection := mg.Db.Collection(queueMap[connection.GetQueue(q).Name])
 				_, err = collection.InsertOne(context.TODO(), logObject)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					return
 				}
 			}
