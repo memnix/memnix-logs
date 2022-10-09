@@ -6,7 +6,6 @@ import (
 
 	rmq "github.com/memnix/rabbitmq-tools"
 
-	"fmt"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -20,32 +19,33 @@ func failOnError(err error, msg string) {
 
 var mg MongoInstance
 
-func main() {
-
-	// Load var from .env file
+func init() {
 	LoadVar()
+}
+
+func main() {
 
 	err := Connect()
 	if err != nil {
-		log.Fatal(err)
+		failOnError(err, "Failed to connect to mongoDB")
 	}
 
 	defer func() {
-		fmt.Println("Disconnect")
+		log.Println("Disconnect from mongoDB")
 		err := mg.Client.Disconnect(context.TODO())
 		if err != nil {
-			return
+			failOnError(err, "Failed to disconnect from mongoDB")
 		}
 	}()
 
 	connection := new(rmq.RabbitMQConnection)
 
-	err = connection.InitConnection(RabbitMQURL, "logs")
+	err = connection.InitConnection(RabbitMQURL, LOGS_EXCHANGE)
 	if err != nil {
-		return
+		failOnError(err, "Failed to connect to RabbitMQ")
 	}
 
-	fmt.Println("Connected")
+	log.Println("Connected to RabbitMQ")
 
 	defer func() {
 		err := connection.CloseConnection()
@@ -94,11 +94,16 @@ func main() {
 			for d := range delivery {
 				logObject := new(Log)
 				err := json.Unmarshal(d.Body, &logObject)
-				collection := mg.Db.Collection(queueMap[connection.GetQueue(q).Name])
+				queue, err := connection.GetQueue(q)
+				if err != nil {
+					log.Printf("Failed to get queue %s : %s", q, err)
+					continue
+				}
+				collection := mg.Db.Collection(queueMap[queue.Name])
 				_, err = collection.InsertOne(context.TODO(), logObject)
 				if err != nil {
-					log.Println(err)
-					return
+					log.Printf("Error while inserting log to mongo: %s", err)
+					continue
 				}
 			}
 		}(q, d)
