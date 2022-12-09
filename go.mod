@@ -6,7 +6,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/memnix/rabbitmq-tools v0.1.0
 	github.com/rabbitmq/amqp091-go v1.5.0
-	go.mongodb.org/mongo-driver v1.10.3
+	go.mongodb.org/mongo-driver v1.11.1
 )
 
 require (
